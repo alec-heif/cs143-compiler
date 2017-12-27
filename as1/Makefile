@@ -1,63 +1,51 @@
 
-ASSN = 2J
+ASSN = 2
 CLASS= cs143
 CLASSDIR= /usr/class/cs143/cool
 LIB= -lfl
 
-SRC= cool.lex test.cl README
-CSRC=	\
-	AbstractSymbol.java \
-	AbstractTable.java \
-	BoolConst.java \
-	CgenSupport.java \
-	Flags.java \
-	IdSymbol.java \
-	IdTable.java \
-	IntSymbol.java \
-	IntTable.java \
-	Lexer.java \
-	StringSymbol.java \
-	StringTable.java \
-	TokenConstants.java \
-	Utilities.java
+SRC= cool.flex test.cl README 
+CSRC= lextest.cc utilities.cc stringtab.cc handle_flags.cc
 TSRC= mycoolc
-CGEN= CoolLexer.java
+HSRC= 
+CGEN= cool-lex.cc
+HGEN=
 LIBS= parser semant cgen
 CFIL= ${CSRC} ${CGEN}
 LSRC= Makefile
-CLS= ${CFIL:.java=.class}
+OBJS= ${CFIL:.cc=.o}
 OUTPUT= test.output
 
-CUPCLASSPATH := ${CLASSDIR}/lib/java-cup-11a.jar:${CLASSDIR}/lib/jlex.jar
+CPPINCLUDE= -I. -I${CLASSDIR}/include/PA${ASSN} -I${CLASSDIR}/src/PA${ASSN}
 
-JAVAC := javac
-JLEX := java -classpath ${CLASSDIR}/lib/jlex.jar JLex.Main
 
-# sm: we need rt.jar on Solaris/x86, and I'm hoping it won't
-# cause a problem elsewhere
-CLASSPATH := ${CUPCLASSPATH}:.:/usr/java/lib/rt.jar
+FFLAGS= -d -ocool-lex.cc
 
-source : ${SRC} ${TSRC} ${LSRC} ${LIBS} ${CSRC}
+CC=g++
+CFLAGS= -g -Wall -Wno-unused -Wno-write-strings ${CPPINCLUDE}
+FLEX=flex ${FFLAGS}
+DEPEND = ${CC} -MM ${CPPINCLUDE}
+
+
+source : ${SRC} ${TSRC} ${LSRC} ${LIBS} lsource
+
+lsource: ${LSRC}
 
 ${OUTPUT}:	lexer test.cl
 	@rm -f test.output
 	-./lexer test.cl >test.output 2>&1 
 
-lexer: Makefile ${CLS}
-	@rm -f lexer
-	echo '#!/bin/sh' >> lexer
-	echo 'java -classpath ${CLASSPATH}:`dirname $$0` Lexer $$*' >> lexer
-	chmod 755 lexer
+lexer: ${OBJS}
+	${CC} ${CFLAGS} ${OBJS} ${LIB} -o lexer
 
-CoolLexer.java: cool.lex
-	${JLEX} $<
-	mv cool.lex.java CoolLexer.java
+.cc.o:
+	${CC} ${CFLAGS} -c $<
+
+cool-lex.cc: cool.flex 
+	${FLEX} cool.flex
 
 dotest:	lexer test.cl
 	./lexer test.cl
-
-${CLS}: ${CFIL}
-	${JAVAC} -classpath ${CLASSPATH} ${CFIL}
 
 ${LIBS}:
 	${CLASSDIR}/etc/link-object ${ASSN} $@
@@ -74,10 +62,21 @@ ${LSRC} :
 ${TSRC} ${CSRC}:
 	-ln -s ${CLASSDIR}/src/PA${ASSN}/$@ $@
 
-clean :
-	-rm -f *.s ${OUTPUT} ${CLS} *~ lexer parser cgen semant
+${HSRC}:
+	-ln -s ${CLASSDIR}/include/PA${ASSN}/$@ $@
 
 submit-clean: ${OUTPUT}
-	-rm -f *.s ${CLS} ${CGEN} *~ lexer parser cgen semant
+	-rm -f *.s core ${OBJS} lexer cool-lex.cc *~ parser cgen semant
+
+clean :
+	-rm -f ${OUTPUT} *.s core ${OBJS} lexer cool-lex.cc *~ parser cgen semant
+
+clean-compile:
+	@-rm -f core ${OBJS} cool-lex.cc ${LSRC}
+
+%.d: %.cc ${SRC} ${LSRC}
+	${SHELL} -ec '${DEPEND} $< | sed '\''s/\($*\.o\)[ :]*/\1 $@ : /g'\'' > $@'
+
+-include ${CFIL:.cc=.d}
 
 
