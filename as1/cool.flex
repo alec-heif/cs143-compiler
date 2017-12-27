@@ -67,8 +67,9 @@ DIGIT           [0-9]+
 
 {DIGIT} {
   printf("\nTEST: %s\n", yytext);
-  return (DARROW);
-  // return (STR_CONST);
+  cool_yylval.symbol = inttable.add_string(yytext);
+  // return (DARROW);
+  return INT_CONST;
 }
 
 .|\n { /* Ignore all other characters */ }

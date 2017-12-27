@@ -535,7 +535,7 @@ int yy_flex_debug = 1;
 
 static yyconst flex_int16_t yy_rule_linenum[4] =
     {   0,
-       66,   68,   74
+       66,   68,   75
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -977,14 +977,15 @@ YY_RULE_SETUP
 #line 68 "cool.flex"
 {
   printf("\nTEST: %s\n", yytext);
-  return (DARROW);
-  // return (STR_CONST);
+  cool_yylval.symbol = inttable.add_string(yytext);
+  // return (DARROW);
+  return INT_CONST;
 }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 74 "cool.flex"
+#line 75 "cool.flex"
 { /* Ignore all other characters */ }
 	YY_BREAK
 /*
@@ -999,10 +1000,10 @@ YY_RULE_SETUP
   */
 case 4:
 YY_RULE_SETUP
-#line 90 "cool.flex"
+#line 91 "cool.flex"
 ECHO;
 	YY_BREAK
-#line 1006 "cool-lex.cc"
+#line 1007 "cool-lex.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2137,7 +2138,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 90 "cool.flex"
+#line 91 "cool.flex"
 
 
 
