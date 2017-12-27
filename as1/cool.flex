@@ -50,6 +50,7 @@ extern YYSTYPE cool_yylval;
  */
 
 DARROW          =>
+DIGIT           [0-9]+
 
 %%
 
@@ -61,7 +62,16 @@ DARROW          =>
  /*
   *  The multiple-character operators.
   */
+
 {DARROW}		{ return (DARROW); }
+
+{DIGIT} {
+  printf("\nTEST: %s\n", yytext);
+  return (DARROW);
+  // return (STR_CONST);
+}
+
+.|\n { /* Ignore all other characters */ }
 
  /*
   * Keywords are case-insensitive except for the values true and false,
