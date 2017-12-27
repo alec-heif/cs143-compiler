@@ -1,2 +1,1 @@
-*.class
-as1/lexer
+*.o
